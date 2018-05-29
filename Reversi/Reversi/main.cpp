@@ -565,7 +565,7 @@ int checkResult(char board[8][8])//0 for not finish,1 for black win,2 for white 
 	}
 }
 
-void add(Node *root,int turn)
+void add(Node *root)
 {
 	//cout << ":" << root->child.size();
 	root->child = (Node **)malloc(sizeof(Node*) * 32);
@@ -577,7 +577,7 @@ void add(Node *root,int turn)
 			//cout << i << " " << j << endl;
 			if (root->board[i][j] == 0)
 			{
-				if (check(root->board,i,j,turn) == true)
+				if (check(root->board,i,j,root->turn) == true)
 				{
 					Node* ptr;
 					ptr = (Node*)malloc(sizeof(Node));
@@ -588,7 +588,7 @@ void add(Node *root,int turn)
 					ptr->child = NULL;
 					ptr->x = i;
 					ptr->y = j;
-					ptr->turn = turn % 2 + 1;
+					ptr->turn = root->turn % 2 + 1;
 					for (int a = 0; a < 8; a++)
 					{
 						for (int b = 0; b < 8; b++)
@@ -601,7 +601,7 @@ void add(Node *root,int turn)
 						int ii = i + Move[k][0], jj = j + Move[k][1];
 						if (ii < 0 || ii >= 8 || jj < 0 || jj >= 8
 							|| root->board[ii][jj] == 0
-							|| root->board[ii][jj] == turn)
+							|| root->board[ii][jj] == root->turn)
 							continue;
 						while (1)
 						{
@@ -610,13 +610,13 @@ void add(Node *root,int turn)
 							if (ii < 0 || ii >= 8 || jj < 0 || jj >= 8
 								|| root->board[ii][jj] == 0)
 								break;
-							else if (root->board[ii][jj] == turn)
+							else if (root->board[ii][jj] == root->turn)
 							{
 								while (ii != i || jj != j)
 								{
 									ii -= Move[k][0];
 									jj -= Move[k][1];
-									ptr->board[ii][jj] = turn;
+									ptr->board[ii][jj] = root->turn;
 								}
 								break;
 							}
@@ -630,7 +630,8 @@ void add(Node *root,int turn)
 	if (root->number == 0 && checkResult(root->board) == 0)
 	{
 		free(root->child);
-		add(root, turn % 2 + 1);
+		root->turn = root->turn % 2 + 1;
+		add(root);
 	}
 	else
 	{
@@ -836,7 +837,7 @@ int main()
 		}
 		Begin = clock();
 		int i = 0;
-		while(clock() - Begin < 50 * CLOCKS_PER_SEC)
+		//while(clock() - Begin < 1 * CLOCKS_PER_SEC)
 		//for (int i = 0; i < 100; i++)
 		{
 			//Begin = clock();
@@ -859,7 +860,7 @@ int main()
 			result = false;
 			if (r == 0)
 			{
-				add(ptr, ptr->turn);
+				add(ptr);
 				//cout << " add";
 				result = Random(ptr->board, ptr->turn);
 				/*cout << result;
@@ -890,33 +891,38 @@ int main()
 			/*cout << root->scores << "/" << root->total << endl;
 			system("pause");*/
 		}
-		double m = 0;
-		int k;
-		for (int i = 0; i < root->number; i++)
+		Node*ptr = root;
+		if (root->turn == 1)
 		{
-			if (root->child[i]->scores > m * root->child[i]->total)
-				k = i;
-		}
-		Node*ptr;
-		ptr = root->child[k];
-		cout << "黑子下:" << ptr->x << " " << ptr->y << endl;
-		cout << "  0  1  2  3  4  5  6  7\n";
-		cout << " *--*--*--*--*--*--*--*--*\n";
-		for (int i = 0; i < 8; i++)
-		{
-			cout << i;
-			for (int j = 0; j < 8; j++)
-				if (ptr->board[i][j] != 0)
-					cout << "| " << (int)ptr->board[i][j];
-				else
-					cout << "|  ";
-			cout << "|\n *--*--*--*--*--*--*--*--*\n";
+			double m = 0;
+			int k;
+			for (int i = 0; i < root->number; i++)
+			{
+				if (root->child[i]->scores > m * root->child[i]->total)
+					k = i;
+			}
+			
+			ptr = root->child[k];
+			cout << ptr->turn << endl;
+			cout << "黑子下:" << ptr->x << " " << ptr->y << endl;
+			cout << "  0  1  2  3  4  5  6  7\n";
+			cout << " *--*--*--*--*--*--*--*--*\n";
+			for (int i = 0; i < 8; i++)
+			{
+				cout << i;
+				for (int j = 0; j < 8; j++)
+					if (ptr->board[i][j] != 0)
+						cout << "| " << (int)ptr->board[i][j];
+					else
+						cout << "|  ";
+				cout << "|\n *--*--*--*--*--*--*--*--*\n";
+			}
 		}
 		//cout << ptr->turn << endl;
 		//system("pause");
-		cout << "请输入:";
 		while (ptr->turn == 2)
 		{
+			cout << "请输入:";
 			int x, y;
 			cin >> x >> y;
 			while (check(ptr->board, x, y, 2) == false)
