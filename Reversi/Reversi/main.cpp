@@ -1,484 +1,20 @@
-//#include <vector>
-//#include <set>
-//#include <iostream>
-//#include <cstdlib>
-//#include <ctime>
-//
-//using namespace std;
-//
-//typedef struct position
-//{
-//	int x;
-//	int y;
-//	struct position() :x(0), y(0) {};
-//	struct position(int xx, int yy) :x(xx), y(yy) {}
-//	bool operator < (const struct position &a) const
-//	{
-//		return x < a.x || (x == a.x && y < a.y);
-//	}
-//}Position;
-//
-//set<Position>candidate;
-//int board[8][8];//0 for empty,1 for black,2 for white;I'm black
-//int maxDepth = 4, maxRandom = 100;
-//int Move[8][2] = { {-1,-1},{-1,0},{-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1} };
-//
-//void check(vector<Position>&dst,int type)
-//{
-//	dst.clear();
-//	int x, y, tx, ty;
-//	bool enable;
-//	set<Position>::iterator iter;
-//	for (iter = candidate.begin(); iter != candidate.end(); iter++)
-//	{
-//		x = iter -> x;
-//		y = iter -> y;
-//		enable = false;
-//		for (int i = 0; i < 8; i++)
-//		{
-//			tx = x + Move[i][0];
-//			ty = y + Move[i][1];
-//			if (tx < 0 || tx >= 8 || ty < 0 || ty >= 8)
-//				continue;
-//			if (board[tx][ty] == 0 || board[tx][ty] == type)
-//				continue;
-//			while (1)
-//			{
-//				tx = tx + Move[i][0];
-//				ty = ty + Move[i][1];
-//				if (tx < 0 || tx >= 8 || ty < 0 || ty >= 8)
-//					break;
-//				if (board[tx][ty] == 0)
-//					break;
-//				if (board[tx][ty] == type)
-//				{
-//					enable = true;
-//					break;
-//				}
-//			}
-//		}
-//		if (enable == true)
-//			dst.push_back(*iter);
-//	}
-//}
-//
-//int checkResult()//0 for not finish,1 for black win,2 for white win,3 for tie
-//{
-//	int white = 0, black = 0;
-//	for (int i = 0; i < 8; i++)
-//		for (int j = 0; j < 8; j++)
-//			if (board[i][j] == 1)
-//				black++;
-//			else if (board[i][j] == 2)
-//				white++;
-//	if (black == 0)
-//		return 2;
-//	else if (white == 0)
-//		return 1;
-//	else if (black + white == 64)
-//	{
-//		if (black > white)
-//			return 1;
-//		else if (black < white)
-//			return 2;
-//		else
-//			return 3;
-//	}
-//	else
-//	{
-//		int w, b;
-//		vector<Position> dst;
-//		check(dst, 1);
-//		w = dst.size();
-//		check(dst, 2);
-//		b = dst.size();
-//		if (w == 0 && b == 0)
-//			return black > white ? 1 : 2;
-//	}
-//	return 0;
-//}
-//
-//void change(Position src, vector<Position>&dst)
-//{
-//	dst.clear();
-//	int x, y, maxx = src.x, maxy = src.y;
-//	for (int i = 0; i < 8; i++)
-//	{
-//		x = src.x;
-//		y = src.y;
-//		maxx = src.x;
-//		maxy = src.y;
-//		while (1)
-//		{
-//			x += Move[i][0];
-//			y += Move[i][1];
-//			if (x < 0 || x >= 8 || y < 0 || y >= 8)
-//				break;
-//			if (board[x][y] == 0)
-//				break;
-//			if (board[x][y] == board[src.x][src.y])
-//			{
-//				maxx = x;
-//				maxy = y;
-//				break;
-//			}
-//		}
-//		x = src.x;
-//		y = src.y;
-//		while (x != maxx || y != maxy)
-//		{
-//			x += Move[i][0];
-//			y += Move[i][1];
-//			if (board[src.x][src.y] != board[x][y])
-//			{
-//				board[x][y] = board[src.x][src.y];
-//				dst.push_back(Position(x, y));
-//			}
-//		}
-//	}
-//}
-//
-//void undo(vector<Position>dst)
-//{
-//	for (int i = dst.size() - 1; i >= 0; i--)
-//	{ 
-//		int x = dst[i].x, y = dst[i].y;
-//		board[x][y] = board[x][y] % 2 + 1;
-//	}
-//}
-//
-//bool randomDfs(int depth)
-//{
-//	/*if (depth > 100)
-//	{
-//		for (int i = 0; i < 8; i++)
-//		{
-//			for (int j = 0; j < 8; j++)
-//				cout << board[i][j] << " ";
-//			cout << endl;
-//		}
-//		system("pause");
-//	}*/
-//	//cout << "randomDfs:" << depth << endl;
-//	bool ans;
-//	int k = checkResult();
-//	if (k == 1 || k == 3)
-//		return true;
-//	else if (k == 2)
-//		return false;
-//	vector<Position>dst;
-//	check(dst, depth % 2 + 1);
-//	if (dst.size() == 0)
-//	{
-//		ans = randomDfs(depth + 1);
-//	}
-//	else
-//	{
-//		bool success[8] = { false, false, false, false, false, false, false, false };
-//		int i = rand() % dst.size();
-//		Position d = dst[i];
-//		vector<Position>().swap(dst);
-//		candidate.erase(d);
-//		board[d.x][d.y] = depth % 2 + 1;
-//		int x, y;
-//		for (int j = 0; j < 8; j++)
-//		{
-//			x = d.x + Move[j][0];
-//			y = d.y + Move[j][1];
-//			if (x < 0 || x >= 8 || y < 0 || y >= 8)
-//				continue;
-//			if (board[x][y] == 0)
-//				success[j] = candidate.insert(Position(x, y)).second;
-//		}
-//		vector<Position> c;
-//		change(d, c);
-//		ans = randomDfs(depth + 1);
-//		undo(c);
-//		for (int j = 0; j < 8; j++)
-//		{
-//			x = d.x + Move[j][0];
-//			y = d.y + Move[j][1];
-//			if (x < 0 || x >= 8 || y < 0 || y >= 8)
-//				continue;
-//			if (board[x][y] == 0 && success[j] == true)
-//				candidate.erase(Position(x,y));
-//		}
-//		candidate.insert(d);
-//		board[d.x][d.y] = 0;
-//	}
-//	return ans;
-//}
-//
-//double dfs(int depth)
-//{
-//	//cout << "Dfs:" << depth << endl;
-//	double ans;
-//	if (depth == maxDepth)
-//	{
-//		ans = 0;
-//		for (int i = 0; i < maxRandom; i++)
-//			if (randomDfs(depth))
-//				ans++;
-//		ans /= maxRandom;
-//	}
-//	else
-//	{
-//		int k = checkResult();
-//		if (k == 1)
-//			return 1;
-//		else if (k == 2)
-//			return 0;
-//		else if (k == 3)
-//			return 0.5;
-//		vector<Position>dst;
-//		check(dst,depth % 2 + 1);
-//		ans = depth % 2;
-//		if (dst.size() == 0)
-//		{
-//			ans = dfs(depth + 1);
-//		}
-//		else
-//		{
-//			for (unsigned int i = 0; i < dst.size(); i++)
-//			{
-//				bool success[8] = { false, false, false, false, false, false, false, false };
-//				candidate.erase(dst[i]);
-//				board[dst[i].x][dst[i].y] = depth % 2 + 1;
-//				int x, y;
-//				for (int j = 0; j < 8; j++)
-//				{
-//					x = dst[i].x + Move[j][0];
-//					y = dst[i].y + Move[j][1];
-//					if (x < 0 || x >= 8 || y < 0 || y >= 8)
-//						continue;
-//					if (board[x][y] == 0)
-//						success[j] = candidate.insert(Position(x, y)).second;
-//				}
-//				vector<Position> c;
-//				change(dst[i], c);
-//				double rate = dfs(depth + 1);
-//				undo(c);
-//				if (depth % 2 == 0)
-//				{
-//					if (rate > ans)
-//						ans = rate;
-//				}
-//				else
-//				{
-//					if (rate < ans)
-//						ans = rate;
-//				}
-//				for (int j = 0; j < 8; j++)
-//				{
-//					x = dst[i].x + Move[j][0];
-//					y = dst[i].y + Move[j][1];
-//					if (x < 0 || x >= 8 || y < 0 || y >= 8)
-//						continue;
-//					if (board[x][y] == 0 && success[j] == true)
-//						candidate.erase(Position(x, y));
-//				}
-//				candidate.insert(dst[i]);
-//				board[dst[i].x][dst[i].y] = 0;
-//			}
-//		}
-//	}
-//	return ans;
-//}
-//
-//Position top()
-//{
-//	//cout << "top\n";
-//	vector<Position>dst;
-//	check(dst, 1);
-//	double r = 0;
-//	Position ans(-1,-1);
-//	for (unsigned int i = 0; i < dst.size(); i++)
-//	{
-//		candidate.erase(dst[i]);
-//		board[dst[i].x][dst[i].y] = 1;
-//		int x, y;
-//		bool success[8] = { false, false, false, false, false, false, false, false };
-//		for (int j = 0; j < 8; j++)
-//		{
-//			x = dst[i].x + Move[j][0];
-//			y = dst[i].y + Move[j][1];
-//			if (x < 0 || x >= 8 || y < 0 || y >= 8)
-//				continue;
-//			if (board[x][y] == 0)
-//				success[j] = candidate.insert(Position(x, y)).second;
-//		}
-//		vector<Position> c;
-//		change(dst[i], c);
-//		double rate = dfs(1);
-//		undo(c);
-//		if (rate > r)
-//		{
-//			ans.x = dst[i].x;
-//			ans.y = dst[i].y;
-//		}
-//		for (int j = 0; j < 8; j++)
-//		{
-//			x = dst[i].x + Move[j][0];
-//			y = dst[i].y + Move[j][1];
-//			if (x < 0 || x >= 8 || y < 0 || y >= 8)
-//				continue;
-//			if (board[x][y] == 0 && success[j] == true)
-//				candidate.erase(Position(x, y));
-//		}
-//		candidate.insert(dst[i]);
-//		board[dst[i].x][dst[i].y] = 0;
-//	}
-//	return ans;
-//}
-//
-//void black()
-//{
-//	Position P;
-//	vector<Position>dst;
-//	check(dst, 1);
-//	if (dst.size() == 0)
-//		return;
-//	P = top();
-//	if (P.x == -1 || P.y == -1)
-//		return;
-//	cout << "黑子下:(" << P.x << "," << P.y << ")\n";
-//	board[P.x][P.y] = 1;
-//	change(P, dst);
-//	candidate.erase(P);
-//	int x, y;
-//	for (int i = 0; i < 8; i++)
-//	{
-//		x = P.x + Move[i][0];
-//		y = P.y + Move[i][1];
-//		if (x < 0 || x >= 8 || y < 0 || y >= 8)
-//			continue;
-//		if (board[x][y] == 0)
-//		{
-//			candidate.insert(Position(x, y));
-//		}
-//	}
-//	for (int i = 0; i < 8; i++)
-//	{
-//		for (int j = 0; j < 8; j++)
-//		{
-//			cout << board[i][j] << " ";
-//		}
-//		cout << endl;
-//	}
-//}
-//void white()
-//{
-//	vector<Position>dst;
-//	check(dst, 2);
-//	if (dst.size() == 0)
-//		return;
-//	cout << "您可下的位置有:\n";
-//	for (int i = 0; i < dst.size(); i++)
-//	{
-//		cout << "(" << dst[i].x << "," << dst[i].y << ")\n";
-//	}
-//	int x, y;
-//	cin >> x >> y;
-//	Position TMP(x, y);
-//	if (candidate.count(TMP) == 0)
-//	{
-//		cout << "error:illegal position" << endl;
-//		while (1);
-//	}
-//	else
-//	{
-//		candidate.erase(TMP);
-//		board[TMP.x][TMP.y] = 2;
-//		change(TMP, dst);
-//	}
-//	for (int i = 0; i < 8; i++)
-//	{
-//		x = TMP.x + Move[i][0];
-//		y = TMP.y + Move[i][1];
-//		if (x < 0 || x >= 8 || y < 0 || y >= 8)
-//			continue;
-//		if (board[x][y] == 0)
-//		{
-//			candidate.insert(Position(x, y));
-//		}
-//	}
-//	for (int i = 0; i < 8; i++)
-//	{
-//		for (int j = 0; j < 8; j++)
-//		{
-//			cout << board[i][j] << " ";
-//		}
-//		cout << endl;
-//	}
-//}
-//
-//int main()
-//{
-//	srand(time(NULL));
-//	board[3][3] = 1;
-//	board[3][4] = 2;
-//	board[4][3] = 2;
-//	board[4][4] = 1;
-//	for (int i = 0; i < 8; i++)
-//	{
-//		for (int j = 0; j < 8; j++)
-//		{
-//			cout << board[i][j] << " ";
-//		}
-//		cout << endl;
-//	}
-//	Position p[12];
-//	p[0].x = 2; p[0].y = 2;
-//	candidate.insert(p[0]);
-//	p[1].x = 2; p[1].y = 3;
-//	candidate.insert(p[1]);
-//	p[2].x = 2; p[2].y = 4;
-//	candidate.insert(p[2]);
-//	p[3].x = 2; p[3].y = 5;
-//	candidate.insert(p[3]);
-//	p[4].x = 3; p[4].y = 5;
-//	candidate.insert(p[4]);
-//	p[5].x = 4; p[5].y = 5;
-//	candidate.insert(p[5]);
-//	p[6].x = 5; p[6].y = 5;
-//	candidate.insert(p[6]);
-//	p[7].x = 5; p[7].y = 4;
-//	candidate.insert(p[7]);
-//	p[8].x = 5; p[8].y = 3;
-//	candidate.insert(p[8]);
-//	p[9].x = 5; p[9].y = 2;
-//	candidate.insert(p[9]);
-//	p[10].x = 4; p[10].y = 2;
-//	candidate.insert(p[10]);
-//	p[11].x = 3; p[11].y = 2;
-//	candidate.insert(p[11]);
-//	
-//	int k;
-//	cout << "你想先手(0)/后手(1):\n";
-//	cin >> k;
-//	Label:
-//	if (k == 0)
-//	{
-//		board[3][3] = 2;
-//		board[3][4] = 1;
-//		board[4][3] = 1;
-//		board[4][4] = 2;
-//		white();
-//	}
-//	while (1)
-//	{
-//		black();
-//		white();
-//	}
-//	system("pause");
-//}
-
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
-clock_t Begin;
+#include <cmath>
+#define C 1.0				//logn项系数
+#define N 1.0
+#define E 0.2
+#define CORNER 0.5			//角落系数
+#define BAD 0.6			//坏子系数
+#define MOVABLE 0.01		//行动力系数
+#define SEARCH_TIME 15		//搜索时间
 using namespace std;
+
+char myself, enemy;
+int session_id = 2;
+clock_t Begin;
 int Move[8][2] = { { -1,-1 },{ -1,0 },{ -1,1 },{ 0,-1 },{ 0,1 },{ 1,-1 },{ 1,0 },{ 1,1 } };
 typedef struct node
 {
@@ -488,18 +24,19 @@ typedef struct node
 	struct node *parent;
 	struct node **child;
 	int number;
+	int depth;
 	int x, y;
-	int turn;
+	char turn;
 }Node;
 
-bool check(char board[8][8], int x, int y,int turn)
+bool check(char board[8][8], int x, int y, char turn)
 {
 	bool enable = false;
 	for (int k = 0; k < 8; k++)
 	{
 		int ii = x + Move[k][0], jj = y + Move[k][1];
 		if (ii < 0 || ii >= 8 || jj < 0 || jj >= 8
-			|| board[ii][jj] == 0
+			|| board[ii][jj] == '0'
 			|| board[ii][jj] == turn)
 			continue;
 		while (1)
@@ -507,7 +44,7 @@ bool check(char board[8][8], int x, int y,int turn)
 			ii = ii + Move[k][0];
 			jj = jj + Move[k][1];
 			if (ii < 0 || ii >= 8 || jj < 0 || jj >= 8
-				|| board[ii][jj] == 0)
+				|| board[ii][jj] == '0')
 				break;
 			else if (board[ii][jj] == turn)
 			{
@@ -519,14 +56,25 @@ bool check(char board[8][8], int x, int y,int turn)
 	return enable;
 }
 
+//chess:1为黑,2为白
+float evaluate(char board[8][8], char chess)
+{
+	float result = 0;
+	if (board[0][0] == chess) result += CORNER; else if (board[0][0] == '0' && board[1][1] == chess) result -= BAD * CORNER;
+	if (board[0][7] == chess) result += CORNER;	else if (board[0][7] == '0' && board[1][6] == chess) result -= BAD * CORNER;
+	if (board[7][0] == chess) result += CORNER;	else if (board[7][0] == '0' && board[6][1] == chess) result -= BAD * CORNER;
+	if (board[7][7] == chess) result += CORNER; else if (board[7][7] == '0' && board[6][6] == chess) result -= BAD * CORNER;
+	return result;
+}
+
 int checkResult(char board[8][8])//0 for not finish,1 for black win,2 for white win,3 for tie
 {
 	int white = 0, black = 0;
 	for (int i = 0; i < 8; i++)
 		for (int j = 0; j < 8; j++)
-			if (board[i][j] == 1)
+			if (board[i][j] == 'B')
 				black++;
-			else if (board[i][j] == 2)
+			else if (board[i][j] == 'W')
 				white++;
 	if (black == 0)
 		return 2;
@@ -547,11 +95,11 @@ int checkResult(char board[8][8])//0 for not finish,1 for black win,2 for white 
 		{
 			for (int j = 0; j < 8; j++)
 			{
-				if (board[i][j] == 0)
+				if (board[i][j] == '0')
 				{
-					if (check(board, i, j, 1) == true)
+					if (check(board, i, j, 'W') == true)
 						return 0;
-					if (check(board, i, j, 2) == true)
+					if (check(board, i, j, 'B') == true)
 						return 0;
 				}
 			}
@@ -567,28 +115,27 @@ int checkResult(char board[8][8])//0 for not finish,1 for black win,2 for white 
 
 void add(Node *root)
 {
-	//cout << ":" << root->child.size();
 	root->child = (Node **)malloc(sizeof(Node*) * 32);
 	root->number = 0;
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = 0; j < 8; j++)
 		{
-			//cout << i << " " << j << endl;
-			if (root->board[i][j] == 0)
+			if (root->board[i][j] == '0')
 			{
-				if (check(root->board,i,j,root->turn) == true)
+				if (check(root->board, i, j, root->turn) == true)
 				{
 					Node* ptr;
 					ptr = (Node*)malloc(sizeof(Node));
 					ptr->scores = 0;
 					ptr->total = 0;
+					ptr->depth = root->depth + 1;
 					ptr->parent = root;
 					ptr->number = 0;
 					ptr->child = NULL;
 					ptr->x = i;
 					ptr->y = j;
-					ptr->turn = root->turn % 2 + 1;
+					ptr->turn = root->turn == 'W' ? 'B' : 'W';
 					for (int a = 0; a < 8; a++)
 					{
 						for (int b = 0; b < 8; b++)
@@ -600,7 +147,7 @@ void add(Node *root)
 					{
 						int ii = i + Move[k][0], jj = j + Move[k][1];
 						if (ii < 0 || ii >= 8 || jj < 0 || jj >= 8
-							|| root->board[ii][jj] == 0
+							|| root->board[ii][jj] == '0'
 							|| root->board[ii][jj] == root->turn)
 							continue;
 						while (1)
@@ -608,7 +155,7 @@ void add(Node *root)
 							ii = ii + Move[k][0];
 							jj = jj + Move[k][1];
 							if (ii < 0 || ii >= 8 || jj < 0 || jj >= 8
-								|| root->board[ii][jj] == 0)
+								|| root->board[ii][jj] == '0')
 								break;
 							else if (root->board[ii][jj] == root->turn)
 							{
@@ -622,7 +169,7 @@ void add(Node *root)
 							}
 						}
 					}
-					root->child[root -> number++] = ptr;
+					root->child[root->number++] = ptr;
 				}
 			}
 		}
@@ -630,7 +177,7 @@ void add(Node *root)
 	if (root->number == 0 && checkResult(root->board) == 0)
 	{
 		free(root->child);
-		root->turn = root->turn % 2 + 1;
+		root->turn = root->turn == 'W' ? 'B' : 'W';
 		add(root);
 	}
 	else
@@ -640,6 +187,7 @@ void add(Node *root)
 		for (int i = 0; i < root->number; i++)
 		{
 			tmp[i] = root->child[i];
+			tmp[i]->depth = root->depth + 1;
 		}
 		free(root->child);
 		root->child = tmp;
@@ -665,13 +213,24 @@ Node* search(Node *root)
 					return tmp;
 				}
 			}
-			double max = 0;
+			double max = -10000;
 			double t;
 			Node *tt = NULL;
 			for (int i = 0; i < tmp->number; i++)
 			{
 				Node* ttmp = tmp->child[i];
-				t = 1.0 * ttmp->scores / ttmp->total + sqrt(2 * log(tmp->total) / ttmp->total);
+				ttmp->depth = tmp->depth + 1;
+				if (ttmp->depth < 0 || ttmp->depth>64) cout << "error" << endl;
+				if (tmp->turn == myself)
+				{
+					if (tmp->depth <= 44) t = N * ttmp->scores / ttmp->total + C * sqrt(2 * log(tmp->total) / ttmp->total) + E * (evaluate(ttmp->board, ttmp->turn=='W'?'B':'W') - MOVABLE * ttmp->number);
+					else t = N * ttmp->scores / ttmp->total + C * sqrt(2 * log(tmp->total) / ttmp->total);
+				}
+				else
+				{
+					if (tmp->depth <= 44) t = N * (1 - 1.0*ttmp->scores / ttmp->total) + C * sqrt(2 * log(tmp->total) / ttmp->total) + E * (evaluate(ttmp->board, ttmp->turn == 'W' ? 'B' : 'W') - MOVABLE * ttmp->number);
+					else t = N * (1 - 1.0*ttmp->scores / ttmp->total) + C * sqrt(2 * log(tmp->total) / ttmp->total);
+				}
 				if (t > max)
 				{
 					tt = ttmp;
@@ -691,7 +250,7 @@ typedef struct position
 	int y; struct position(int xx, int yy) :x(xx), y(yy) {}
 }Position;
 
-bool Random(char board[8][8],int turn)
+bool Random(char board[8][8], char turn)
 {
 	char b[8][8];
 	for (int i = 0; i < 8; i++)
@@ -701,15 +260,15 @@ bool Random(char board[8][8],int turn)
 	{
 		int Result = checkResult(b);
 		if (Result == 2)
-			return false;
+			return myself== 'W'?true:false;
 		else if (Result == 1 || Result == 3)
-			return true;
+			return myself=='B'?true:false;
 		vector<Position>next;
 		for (int i = 0; i < 8; i++)
 		{
 			for (int j = 0; j < 8; j++)
 			{
-				if(b[i][j] == 0 && check(b, i, j, turn) == true)
+				if (b[i][j] == '0' && check(b, i, j, turn) == true)
 					next.push_back(Position(i, j));
 			}
 		}
@@ -717,7 +276,6 @@ bool Random(char board[8][8],int turn)
 		{
 			int n = rand() % next.size();
 			int x, y, xx = next[n].x, yy = next[n].y;
-			//cout << xx << " " << yy << endl;
 			for (int i = 0; i < 8; i++)
 			{
 				x = xx;
@@ -735,7 +293,6 @@ bool Random(char board[8][8],int turn)
 					if (b[x][y] == turn)
 						break;
 				}
-				//cout << "x:y:" << x << " " << y;
 				while (x != xx || y != yy)
 				{
 					x -= Move[i][0];
@@ -747,38 +304,7 @@ bool Random(char board[8][8],int turn)
 				}
 			}
 		}
-		turn = turn % 2 + 1;
-		/*if (clock() - Begin > 10 * CLOCKS_PER_SEC)
-		{
-			cout << Result << endl;
-			for (int i = 0; i < 8; i++)
-			{
-				for (int j = 0; j < 8; j++)
-					if (b[i][j] != 0)
-						cout << (int)b[i][j] << " ";
-					else
-						cout << "  ";
-				cout << endl;
-			}
-			int white = 0, black = 0;
-			for (int i = 0; i < 8; i++)
-				for (int j = 0; j < 8; j++)
-					if (b[i][j] == 1)
-						black++;
-					else if (b[i][j] == 2)
-						white++;
-			for (int i = 0; i < 8; i++)
-			{
-				for (int j = 0; j < 8; j++)
-				{
-					if (check(board, i, j, 1) == true)
-						cout << "1:" << i << " " << j << endl;
-					if (check(board, i, j, 2) == true)
-						cout << "2:" << i << " " << j << endl;
-				}
-			}
-			system("pause");
-		}*/
+		turn = turn == 'W' ? 'B' : 'W';
 	}
 }
 
@@ -795,29 +321,47 @@ void Free(Node *root)
 int main()
 {
 	srand(time(NULL));
+	cout << "电脑执黑棋(B)/白棋(W):\n";
+	while (myself != 'W' && myself != 'B')
+		cin >> myself;
+	enemy = myself == 'W' ? 'B' : 'W';
 	Node *root;
 	root = (Node*)malloc(sizeof(Node));
 	root->scores = 0;
 	root->total = 0;
 	root->parent = NULL;
-	//root->child = (Node **)malloc(sizeof(Node*) * 8);
+	root->depth = 1;
 	root->child = NULL;
 	root->number = 0;
 	root->x = -1;
 	root->y = -1;
-	root->turn = 1;
+	root->turn = 'B';
 	for (int a = 0; a < 8; a++)
 	{
 		for (int b = 0; b < 8; b++)
 		{
-			root->board[a][b] = 0;
+			root->board[a][b] = '0';
 		}
 	}
-	root->board[3][3] = 2;
-	root->board[3][4] = 1;
-	root->board[4][3] = 1;
-	root->board[4][4] = 2;
+	root->board[3][3] = 'W';
+	root->board[3][4] = 'B';
+	root->board[4][3] = 'B';
+	root->board[4][4] = 'W';
+	cout << "初始棋盘:\n";
+	cout << "  0  1  2  3  4  5  6  7\n";
+	cout << " *--*--*--*--*--*--*--*--*\n";
+	for (int i = 0; i < 8; i++)
+	{
+		cout << i;
+		for (int j = 0; j < 8; j++)
+			if (root->board[i][j] != '0')
+				cout << "| " << root->board[i][j];
+			else
+				cout << "|  ";
+		cout << "|\n *--*--*--*--*--*--*--*--*\n";
+	}
 	int r;
+	Node*ptr=NULL;
 	while (1)
 	{
 		r = checkResult(root->board);
@@ -835,42 +379,26 @@ int main()
 		default:
 			break;
 		}
+		ptr = root;
+		
 		Begin = clock();
 		int i = 0;
-		//while(clock() - Begin < 1 * CLOCKS_PER_SEC)
-		//for (int i = 0; i < 100; i++)
+		while (clock() - Begin < SEARCH_TIME * CLOCKS_PER_SEC)
 		{
-			//Begin = clock();
-			Node *ptr = search(root);
+			ptr = search(root);
 			bool result;
 			i++;
-			//cout << i << " ";
-			/*for (int i = 0; i < 8; i++)
-			{
-				for (int j = 0; j < 8; j++)
-					if (ptr->board[i][j] != 0)
-						cout << (int)ptr->board[i][j] << " ";
-					else
-						cout << "  ";
-				cout << endl;
-			}
-			cout << endl;
-			system("pause");*/
 			r = checkResult(ptr->board);
 			result = false;
 			if (r == 0)
 			{
 				add(ptr);
-				//cout << " add";
 				result = Random(ptr->board, ptr->turn);
-				/*cout << result;
-				system("pause");
-				cout << " result";*/
 			}
 			else if (r == 1 || r == 3)
-				result = true;
+				result = myself == 'B' ? true : false;
 			else if (r == 2)
-				result = false;
+				result = myself == 'W' ? true : false;
 			if (result == true)
 			{
 				while (ptr != NULL)
@@ -888,44 +416,57 @@ int main()
 					ptr = ptr->parent;
 				}
 			}
-			/*cout << root->scores << "/" << root->total << endl;
-			system("pause");*/
 		}
-		Node*ptr = root;
-		if (root->turn == 1)
+		cout << i << endl;
+		ptr = root;
+		if (root->turn == myself)
 		{
 			double m = 0;
-			int k;
+			int k = 0;
 			for (int i = 0; i < root->number; i++)
 			{
-				if (root->child[i]->scores > m * root->child[i]->total)
+				int movable_number;
+				int max_do = -10000;
+				for (int ii = 0; ii < root->child[i]->number; ii++)
+				{
+					if (root->child[i]->child[ii]->total > max_do)
+					{
+						max_do = root->child[i]->child[ii]->total;
+						movable_number = root->child[i]->child[ii]->number;
+					}
+				}
+				if (1.0*root->child[i]->scores / root->child[i]->total + E * (evaluate(root->child[i]->board, root->turn) + MOVABLE * movable_number) > m)
+				{
+					m = 1.0*root->child[i]->scores / root->child[i]->total + E * (evaluate(root->child[i]->board, root->turn) + MOVABLE * movable_number);
 					k = i;
+				}
+				cout << "胜率" << 1.0*root->child[i]->scores / root->child[i]->total << endl;
 			}
-			
 			ptr = root->child[k];
+			//cout << ptr->turn << endl;
+			cout << "电脑下:" << ptr->x << " " << ptr->y << endl;
 			cout << ptr->turn << endl;
-			cout << "黑子下:" << ptr->x << " " << ptr->y << endl;
+			//cout << "evaluate: " << evaluate(ptr->board, 3 - ptr->turn) + MOVABLE * ptr->number << endl;
+			cout << "这一步" << 1.0 * ptr->scores / ptr->total << endl;
 			cout << "  0  1  2  3  4  5  6  7\n";
 			cout << " *--*--*--*--*--*--*--*--*\n";
 			for (int i = 0; i < 8; i++)
 			{
 				cout << i;
 				for (int j = 0; j < 8; j++)
-					if (ptr->board[i][j] != 0)
-						cout << "| " << (int)ptr->board[i][j];
+					if (ptr->board[i][j] != '0')
+						cout << "| " << ptr->board[i][j];
 					else
 						cout << "|  ";
 				cout << "|\n *--*--*--*--*--*--*--*--*\n";
 			}
 		}
-		//cout << ptr->turn << endl;
-		//system("pause");
-		while (ptr->turn == 2)
+		while (ptr->turn == enemy)
 		{
 			cout << "请输入:";
 			int x, y;
 			cin >> x >> y;
-			while (check(ptr->board, x, y, 2) == false)
+			while (check(ptr->board, x, y, enemy) == false)
 			{
 				cout << "不合法输入，请重新输入:" << endl;
 				cin >> x >> y;
@@ -944,8 +485,8 @@ int main()
 			{
 				cout << i;
 				for (int j = 0; j < 8; j++)
-					if (ptr->board[i][j] != 0)
-						cout << "| " << (int)ptr->board[i][j];
+					if (ptr->board[i][j] != '0')
+						cout << "| " << ptr->board[i][j];
 					else
 						cout << "|  ";
 				cout << "|\n *--*--*--*--*--*--*--*--*\n";
@@ -953,7 +494,7 @@ int main()
 		}
 		Node *p;
 		p = ptr->parent;
-		for(int i = p->number - 1 ;i >= 0;i--)
+		for (int i = p->number - 1; i >= 0; i--)
 			if (p->child[i] == ptr)
 			{
 				p->child[i] = NULL;
@@ -962,20 +503,6 @@ int main()
 		ptr->parent = NULL;
 		Free(root);
 		root = ptr;
-		cout << i << endl;
 	}
-	/*add(root, 1);
-	for (int i = 0; i < root->number; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			for (int k = 0; k < 8; k++)
-			{
-				cout << (int)root->child[i]->board[j][k] << " ";
-			}
-			cout << endl;
-		}
-		cout << endl;
-	}*/
 	system("pause");
 }
